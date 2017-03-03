@@ -1,5 +1,7 @@
 import * as t from "babel-types";
 
+const BLOCKHOIST_TOP = 3;
+
 export const visitor = {
   Function(path) {
     const params: Array = path.get("params");
@@ -17,7 +19,8 @@ export const visitor = {
         const declar = t.variableDeclaration("let", [
           t.variableDeclarator(param.node, uid)
         ]);
-        declar._blockHoist = outputParamsLength - i;
+        // Hoist to the top but keep order of params
+        declar._blockHoist = (outputParamsLength - i) + BLOCKHOIST_TOP;
 
         path.ensureBlock();
         path.get("body").unshiftContainer("body", declar);

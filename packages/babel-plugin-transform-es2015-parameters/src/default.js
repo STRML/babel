@@ -15,6 +15,8 @@ const buildCutOff = template(`
   let $0 = $1[$2];
 `);
 
+const BLOCKHOIST_TOP = 3;
+
 function hasDefaults(node) {
   for (const param of (node.params: Array<Object>)) {
     if (!t.isIdentifier(param)) return true;
@@ -70,7 +72,8 @@ export const visitor = {
         ARGUMENT_KEY:  t.numericLiteral(i),
         ARGUMENTS:     argsIdentifier
       });
-      defNode._blockHoist = node.params.length - i;
+      // Hoist to the top but keep order of params
+      defNode._blockHoist = (node.params.length - i) + BLOCKHOIST_TOP;
       body.push(defNode);
     }
 
@@ -121,7 +124,8 @@ export const visitor = {
       if (param._isDefaultPlaceholder) continue;
 
       const declar = buildCutOff(param, argsIdentifier, t.numericLiteral(i));
-      declar._blockHoist = node.params.length - i;
+      // Hoist to the top but keep order of params
+      defNode._blockHoist = (node.params.length - i) + BLOCKHOIST_TOP;
       body.push(declar);
     }
 
